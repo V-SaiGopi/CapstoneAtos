@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <title>Rolex Admin Dashboard </title>
+    <link rel="icon" href="./images/rolexlogo.png" type="image/x-icon" />
+    <link rel="stylesheet"
+        href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
+    <link rel="stylesheet" href="./css/adminDashboardStyle.css">
+</head>
+<body>
+ <input type="checkbox" name="" id="menu-toggle">
+ <div class="overlay">
+    <label for="menu-toggle"></label>
+</div>
+   <div class="sidebar">
+        <div class="siderbar-container">
+         <div class="brand">
+             <h3>
+                <span class="lab la-staylinked"></span>
+                ROLEX
+             </h3>
+         </div>
+
+            <div class="sidebar-avartar">
+             <div>
+                 <img src="image.jpg" alt="">
+             </div>
+             <div class="avartar-info">
+                 <div class="avartar-text">
+                     <h4>ROLEX</h4>
+                     <small>Admin Menu</small>
+                 </div>
+                 <span class="la la-angle-double-down"></span>
+             </div>
+            </div>
+            <div class="siderbar-menu">
+                <ul>
+                 <li>
+                     <a href="adminDashboard" class="active">
+                         <span class="las la-adjust"></span>
+                         <span>Dashboard</span>
+                     </a>
+                 </li><br/>
+                 <li>
+                     <a href="listProduct">
+                         <span class="las la-video"></span>
+                         <span>List Product</span>
+                     </a>
+                 </li><br/>
+                    <li>
+                        <a href="couponList">
+                            <span class="las la-chart-bar"></span>
+                            <span>List Coupon</span>
+                        </a>
+                    </li><br/>
+                    <li>
+                        <a href="admin">
+                            <span class="las la-calendar"></span>
+                            <span>Add Product</span>
+                        </a>
+                    </li><br/>
+                    <li>
+                        <a href="couponcode">
+                            <span class="las la-user"></span>
+                            <span>Add Coupon</span>
+                        </a>
+                    </li><br/>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+    <div class="main-content">
+        <header>
+            <div class="header-title-wrapper">
+                <label for="menu-toggle">
+                    <span class="las la-bars"></span>
+                </label>
+                <div class="header-title">
+                    <h1>ROLEX DASHBOARD</h1>
+                    <p>Full time analysis about rolex<span class="las la-chart-
+                     line"></span></p>
+                </div>
+                <div id="adminName">
+                    
+                </div>
+
+            </div>
+            <div class="header-action">
+                <a href="AdminLogin">
+                    <button class="btn btn-main" onclick="localStorage.clear()">
+                        Logout
+                    </button>
+                </a>
+            </div>
+        </header>
+        <main>
+            <section>
+                <h3 class="section-head">Overview</h3>
+                <div class="analytics">
+                    <div class="analytic">
+                        <div class="analytic-icon">
+                            <span class="las la-eye"></span>
+                        </div>
+                        <div class="analytic-info">
+                            <h4>Total Users</h4>
+                            <h1 id="totalUser"></h1>
+                        </div>
+                    </div>
+                    <div class="analytic">
+                        <div class="analytic-icon">
+                            <span class="las la-clock"></span>
+                        </div>
+                        <div class="analytic-info">
+                            <h4>Total Orders</h4>
+                            <h1 id="totalOrders"></h1>
+                        </div>
+                    </div>
+                    <div class="analytic">
+                        <div class="analytic-icon">
+                            <span class="las la-users"></span>
+                        </div>
+                        <div class="analytic-info">
+                            <h4>Total Products</h4>
+                            <h1 id="totalProducts"></h1>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <section>
+                <div class="block-grid">
+                    <div class="revenue-card">
+                        <div class="section-head">Total Revenue</div>
+                        <div class="rev-content">
+                            <img src="image.jpg" alt="" />
+                            <div class="rev-info">
+                                <h3>ROLEX</h3>
+                            </div>
+                            <div class="rev-sum">
+                                <h4>Total income </h4>
+                                <h2 id="totalIncome"></h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </section>
+        </main>
+    </div>
+    <script>
+        document.getElementById("adminName").innerHTML =`Hi ${JSON.parse(localStorage.getItem("loginUserDetails")).name}!`
+        var totalUser;
+        var custOrdersDate = [];
+        var custOrderCount = {}
+        window.onload = function () {
+            getTotalUsers()
+            getTotalOrders()
+            getTotalProducts()
+
+        }
+        function getTotalUsers() {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    var res = JSON.parse(xhr.responseText)
+                    document.getElementById("totalUser").innerHTML = res.length
+                }
+            }
+            xhr.open('GET', `http://localhost:8080/api/getAllUsers`, true);
+            xhr.send(null);
+        }
+        function getTotalOrders() {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    var res = JSON.parse(xhr.responseText)
+                    var totalIncome = res.reduce(function (acc, obj) { return acc + obj.price; }, 0);
+                    custOrdersDate = res.map(e => {
+                        var d = new Date(e.orderDate)
+                        return d.toDateString()
+
+                    })
+                    custOrdersDate = [...new Set(custOrdersDate)];
+                    custOrdersDate.forEach(e => {
+                        custOrderCount[e] = 0
+                    })
+                    console.log(custOrdersDate);
+                    res.forEach(en => {
+                        var d = new Date(en.orderDate)
+                        custOrdersDate.forEach(e => {
+                            if (d.toDateString() == e) {
+                                custOrderCount[e] = custOrderCount[e] + 1
+                            }
+                        })
+                    });
+                    custOrderCount = Object.values(custOrderCount)
+                    chart()
+                    document.getElementById("totalOrders").innerHTML = res.length
+                    document.getElementById("totalIncome").innerHTML = `Rs.` + totalIncome
+                }
+            }
+            xhr.open('GET', `http://localhost:8080/api/getOrderdedProducts`, true);
+            xhr.send(null);
+        }
+        function getTotalProducts() {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    var res = JSON.parse(xhr.responseText)
+                    document.getElementById("totalProducts").innerHTML = res.length
+                }
+            }
+            xhr.open('GET', `http://localhost:8080/api/getTotalProducts`, true);
+            xhr.send(null);
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.bundle.js"></script>
+    <script>
+        function chart() {
+            Chart.defaults.global.defaultFontFamily - "Poppins";
+        let ctx = document.querySelector("#revenueChart");
+        let revChartv = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: custOrdersDate,
+                datasets: [
+                    {
+                        label: "No of Orders per day",
+                        borderColor: "#2ec3a3",
+                        borderWidth: "3",
+                        backgroundColor: "rgba(235, 247, 253, 0.7)",
+                        data: custOrderCount
+                    },
+
+                ]
+            },
+            options: {
+                responsive: true,
+                tooltips: {
+                    intersect: false,
+                    node: "index",
+                }
+            }
+
+        });
+        }
+        
+    </script>
+</body>
+
+</html>
